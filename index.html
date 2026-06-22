@@ -206,7 +206,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Hiragino Kaku
       <p class="screen-sub">お名前とメールアドレスを登録してください</p>
       <div class="form-group"><label>保護者のお名前</label><input type="text" id="r-name" placeholder="山田 花子"></div>
       <div class="form-group"><label>メールアドレス</label><input type="email" id="r-email" placeholder="example@email.com"></div>
-      <p class="section-label">晴海西小中学校在籍のお子さまの情報<span style="font-size:11px;font-weight:400;color:#888;margin-left:6px">（最大5人・任意）</span></p>
+      <p class="section-label">晴海西小中学校在籍のお子さまの情報<span style="font-size:11px;font-weight:400;color:#888;margin-left:6px">（最大5人）</span></p>
       <div class="section-note">お名前と生まれ年・月を登録すると、対象学年の募集が一目でわかります</div>
       <div id="children-list">
         <div class="child-block">
@@ -338,7 +338,7 @@ var TAG_DEFS = [
   {id:'e1',label:'小学1年',cls:'e1'},{id:'e2',label:'小学2年',cls:'e2'},{id:'e3',label:'小学3年',cls:'e3'},
   {id:'e4',label:'小学4年',cls:'e4'},{id:'e5',label:'小学5年',cls:'e5'},{id:'e6',label:'小学6年',cls:'e6'},
  {id:'m1',label:'中学1年',cls:'m1'},{id:'m2',label:'中学2年',cls:'m2'},
-  {id:'m3',label:'中学3年',cls:'m3'}, {id:'eall',label:'小学校全学年',cls:'eall'},{id:'mall',label:'中学校全学年',cls:'mall'}
+  {id:'m3',label:'中学3年',cls:'m3'}, {id:'eall',label:'小学校全学年',cls:'eall'},{id:'mall',label:'中学校全学年',cls:'mall'},{id:'e4',label:'地域',cls:'e4'},
 ];
 var events = [], users = [], joins = [];
 var curYear = new Date().getFullYear(), curMonth = new Date().getMonth();
@@ -442,12 +442,16 @@ function doAdminLogin() {
 
 async function enterAdmin() {
   showScreen('screen-admin');
-  var res = await gasCall('getEvents'); events = res.ok && res.events ? res.events : [];
-  var ures = await gasCall('getUsers'); users = ures.ok && ures.users ? ures.users : [];
-  var jres = await gasCall('getJoins'); joins = jres.ok && jres.joins ? jres.joins : [];
+  var results = await Promise.all([
+    gasCall('getEvents'),
+    gasCall('getUsers'),
+    gasCall('getJoins')
+  ]);
+  events = results[0].ok && results[0].events ? results[0].events : [];
+  users = results[1].ok && results[1].users ? results[1].users : [];
+  joins = results[2].ok && results[2].joins ? results[2].joins : [];
   renderAdminEvents(); renderAdminUsers(); renderAdminJoins();
 }
-
 function switchAdminTab(tab) {
   var names = ['events', 'users', 'joins'];
   document.querySelectorAll('.admin-tab').forEach(function(t, i) { t.classList.toggle('active', names[i] === tab); });
@@ -497,11 +501,14 @@ async function enterCalendar() {
     ? currentUser.children.map(function(c) { return (c.name ? c.name + '：' : '') + (c.year && c.month ? c.year + '年' + c.month + '月生（' + calcGrade(c.year, c.month) + '）' : ''); }).filter(function(s) { return s; }).join('　')
     : 'お子さまの情報なし';
   document.getElementById('profile-children').textContent = grades;
-  var res = await gasCall('getEvents'); events = res.ok && res.events ? res.events : [];
-  var jres = await gasCall('getJoins'); joins = jres.ok && jres.joins ? jres.joins : [];
+  var results = await Promise.all([
+    gasCall('getEvents'),
+    gasCall('getJoins')
+  ]);
+  events = results[0].ok && results[0].events ? results[0].events : [];
+  joins = results[1].ok && results[1].joins ? results[1].joins : [];
   renderCalendar();
 }
-
 function doLogout() { currentUser = null; localStorage.removeItem('hns_current'); document.getElementById('profile-panel').classList.remove('open'); showScreen('screen-top'); }
 function toggleProfile() { document.getElementById('profile-panel').classList.toggle('open'); }
 
@@ -553,18 +560,28 @@ function renderList() {
 
 async function toggleJoin(eventId, btn) {
   if (!currentUser) { alert('ログインしてください'); return; }
-  var myJoin = joins.find(function(j){ return j.eventId===String(eventId)&&j.userId===String(currentUser.id); });
+  var myJoin = joins.find(function(j){ return String(j.eventId)===String(eventId)&&String(j.userId)===String(currentUser.id); });
+  
+  // 先に見た目を変える
   if (myJoin) {
-    await gasCall('cancelJoin', {eventId: eventId, userId: currentUser.id});
+    btn.textContent = '参加する';
+    btn.classList.remove('joined');
     joins = joins.filter(function(j){ return j.id !== myJoin.id; });
+    gasCall('cancelJoin', {eventId: eventId, userId: currentUser.id});
   } else {
+    btn.textContent = '✓ 参加予定';
+    btn.classList.add('joined');
     var e = events.find(function(ev){ return String(ev.id)===String(eventId); });
+    var tempId = 'temp_' + Date.now();
+    joins.push({id:tempId,eventId:String(eventId),eventTitle:e?e.title:'',userId:String(currentUser.id),userName:currentUser.name,userEmail:currentUser.email});
     var res = await gasCall('addJoin', {eventId:eventId,eventTitle:e?e.title:'',userId:currentUser.id,userName:currentUser.name,userEmail:currentUser.email});
-    if (res.ok) joins.push({id:res.id,eventId:String(eventId),eventTitle:e?e.title:'',userId:String(currentUser.id),userName:currentUser.name,userEmail:currentUser.email});
+    if (res.ok) {
+      var idx = joins.findIndex(function(j){ return j.id === tempId; });
+      if (idx >= 0) joins[idx].id = res.id;
+    }
   }
   renderList();
 }
-
 function toggleCard(id) { document.getElementById(id).classList.toggle('open'); }
 function scrollToEvent(id) { if (!id) return; var el = document.getElementById('ev-'+id); if (el) { el.scrollIntoView({behavior:'smooth',block:'center'}); el.classList.add('open'); }}
 function changeMonth(d) { curMonth += d; if (curMonth<0){curMonth=11;curYear--;} if (curMonth>11){curMonth=0;curYear++;} renderCalendar(); }
