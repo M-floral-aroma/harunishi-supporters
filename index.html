@@ -547,6 +547,8 @@ function renderList() {
     var label = (dt.getMonth()+1) + '月' + dt.getDate() + '日（' + ['日','月','火','水','木','金','土'][dt.getDay()] + '）';
     var tags = (e.tags||[]).map(function(t){ return '<span class="tag ' + tagCls(t) + '">' + tagLabel(t) + '</span>'; }).join('');
     var jc = joins.filter(function(j) { return String(j.eventId) === String(e.id); }).length;
+    console.log('event id:', String(e.id), 'user id:', String(currentUser.id));
+joins.forEach(function(j){ console.log('join eventId:', String(j.eventId), 'userId:', String(j.userId)); });
     var myJoin = currentUser && joins.find(function(j){ 
   return String(j.eventId).trim()===String(e.id).trim() && String(j.userId).trim()===String(currentUser.id).trim(); 
 });
