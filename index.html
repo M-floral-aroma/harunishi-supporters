@@ -154,7 +154,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Hiragino Kaku
     <div class="wrap">
       <div class="logo">
         <h2>はるにしサポーターズ</h2>
-        <p>晴海西小・中学校 活動カレンダー</p>
+        <p>晴海西小中学校 活動カレンダー</p>
       </div>
       <button class="choice-btn" onclick="showScreen('screen-login')">
         <div class="choice-icon blue">
@@ -206,7 +206,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Hiragino Kaku
       <p class="screen-sub">お名前とメールアドレスを登録してください</p>
       <div class="form-group"><label>保護者のお名前</label><input type="text" id="r-name" placeholder="山田 花子"></div>
       <div class="form-group"><label>メールアドレス</label><input type="email" id="r-email" placeholder="example@email.com"></div>
-      <p class="section-label">晴海西小・中学校在籍のお子さまの情報<span style="font-size:11px;font-weight:400;color:#888;margin-left:6px">（最大5人・任意）</span></p>
+      <p class="section-label">晴海西小中学校在籍のお子さまの情報<span style="font-size:11px;font-weight:400;color:#888;margin-left:6px">（最大5人・任意）</span></p>
       <div class="section-note">お名前と生まれ年・月を登録すると、対象学年の募集が一目でわかります</div>
       <div id="children-list">
         <div class="child-block">
@@ -464,7 +464,7 @@ function renderAdminEvents() {
   document.getElementById('admin-event-list').innerHTML = sorted.map(function(e) {
     var dt = new Date(e.date);
     var label = (dt.getMonth()+1) + '月' + dt.getDate() + '日 ' + (e.start||'') + '〜' + (e.end||'');
-    var jc = joins.filter(function(j) { return j.eventId === String(e.id); }).length;
+    var jc = joins.filter(function(j) { return String(j.eventId) === String(e.id); }).length;
     return '<div class="admin-event-row"><div class="admin-event-title">' + e.title + '<span class="badge">' + jc + '人</span></div><div class="admin-event-meta">' + label + '</div><div class="admin-event-actions"><button class="edit-btn" onclick="openEditModal(\'' + e.id + '\')">編集</button><button class="green-btn" onclick="openJoinModal(\'' + e.id + '\')">参加者</button><button class="del-btn" onclick="deleteEventById(\'' + e.id + '\')">削除</button></div></div>';
   }).join('');
 }
@@ -539,7 +539,7 @@ function renderList() {
     var dt = new Date(e.date);
     var label = (dt.getMonth()+1) + '月' + dt.getDate() + '日（' + ['日','月','火','水','木','金','土'][dt.getDay()] + '）';
     var tags = (e.tags||[]).map(function(t){ return '<span class="tag ' + tagCls(t) + '">' + tagLabel(t) + '</span>'; }).join('');
-    var jc = joins.filter(function(j){ return j.eventId === String(e.id); }).length;
+    var jc = joins.filter(function(j) { return String(j.eventId) === String(e.id); }).length;
     var myJoin = currentUser && joins.find(function(j){ return j.eventId === String(e.id) && j.userId === String(currentUser.id); });
     return '<div class="card" id="ev-' + e.id + '">' +
       '<div class="card-title" onclick="toggleCard(\'ev-' + e.id + '\')">' + e.title + '</div>' +
