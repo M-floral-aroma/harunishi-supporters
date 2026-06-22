@@ -624,7 +624,7 @@ async function deleteEventById(id) {
 
 function openJoinModal(eventId) {
   var e = events.find(function(ev){ return String(ev.id)===String(eventId); });
-  var list = joins.filter(function(j){ return j.eventId===String(eventId); });
+  var list = joins.filter(function(j){ return String(j.eventId)===String(eventId); });
   document.getElementById('join-modal-title').textContent = (e?e.title:'') + 'の参加者';
   document.getElementById('join-modal-list').innerHTML = !list.length
     ? '<div class="loading-bar">参加表明はまだありません</div>'
