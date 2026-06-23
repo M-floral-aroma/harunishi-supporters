@@ -499,7 +499,6 @@ function renderAdminJoins() {
 
 async function enterCalendar() {
   showScreen('screen-calendar');
-  alert('currentUser.id: ' + currentUser.id + ' / type: ' + typeof currentUser.id);
   document.getElementById('user-avatar').textContent = currentUser.name.slice(0, 1);
   document.getElementById('profile-name').textContent = currentUser.name;
   document.getElementById('profile-email').textContent = currentUser.email;
