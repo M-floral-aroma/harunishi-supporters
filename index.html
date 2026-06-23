@@ -547,7 +547,12 @@ function renderCalendar() {
 }
 
 function renderList() {
-  var sorted = events.slice().sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); });
+  var today2 = new Date();
+today2.setHours(0, 0, 0, 0);
+var sorted = events.slice().filter(function(e) {
+  var d = new Date(e.date);
+  return d >= today2;
+}).sort(function(a, b) { return String(a.date).localeCompare(String(b.date)); });
   if (!sorted.length) { document.getElementById('event-list').innerHTML = '<div class="loading-bar">募集はまだありません</div>'; return; }
   document.getElementById('event-list').innerHTML = sorted.map(function(e){
     var dt = new Date(e.date);
