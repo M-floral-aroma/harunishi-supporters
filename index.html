@@ -248,8 +248,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Hiragino Kaku
         はるにしサポーターズ
       </h1>
       <div style="display:flex;align-items:center;gap:8px">
-        <div class="user-avatar" id="user-avatar" onclick="toggleProfile()">?</div>
-      </div>
+  <button class="logout-btn" style="margin-top:0;padding:6px 12px;font-size:12px" onclick="doLogout()">ログアウト</button>
+  <div class="user-avatar" id="user-avatar" onclick="toggleProfile()">?</div>
+</div>
     </div>
     <div class="profile-panel" id="profile-panel">
       <div style="font-size:14px;font-weight:700" id="profile-name"></div>
