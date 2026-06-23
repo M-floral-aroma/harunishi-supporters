@@ -1,1 +1,1 @@
-# harunishi-supporters app
+# harunishi-supporters
