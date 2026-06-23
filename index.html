@@ -463,7 +463,12 @@ function tagCls(id) { var t = TAG_DEFS.find(function(t) { return t.id === id; })
 function tagLabel(id) { var t = TAG_DEFS.find(function(t) { return t.id === id; }); return t ? t.label : id; }
 
 function renderAdminEvents() {
-  var sorted = events.slice().sort(function(a, b) { return String(a.date).localeCompare(String(b.date)); });
+  var today2 = new Date();
+today2.setHours(0, 0, 0, 0);
+var sorted = events.slice().filter(function(e) {
+  var d = new Date(e.date);
+  return d >= today2;
+}).sort(function(a, b) { return String(a.date).localeCompare(String(b.date)); });
   if (!sorted.length) { document.getElementById('admin-event-list').innerHTML = '<div class="loading-bar">募集はまだありません</div>'; return; }
   document.getElementById('admin-event-list').innerHTML = sorted.map(function(e) {
     var dt = new Date(e.date);
